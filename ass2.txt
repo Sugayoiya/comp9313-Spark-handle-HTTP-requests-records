@@ -1,0 +1,127 @@
+val line=sc.textFile("sample_input.txt",1)
+
+//val words = line.map(x=>(x.split(",")(0),x.split(",")(3)))
+
+
+def transformBytes(a:String):Double = {
+     var sum:Double=a.split("[a-zA-Z]+")(0).toDouble
+     var unit:String=a.split("\\d+")(1)
+     if(unit=="KB"){sum=sum*1024}
+     else if (unit=="MB"){sum=sum*1024*1024}
+     return sum
+     }
+
+val words = line.map(x=>(x.split(",")(0),transformBytes(x.split(",")(3))))
+
+
+```
+(http://subdom0001.example.com,3)
+(http://subdom0002.example.com,451936256)
+(http://subdom0003.example.com,236544)
+(http://subdom0002.example.com,30408704)
+(http://subdom0001.example.com,238)
+(http://subdom0002.example.com,33554432)
+(http://subdom0003.example.com,21504)
+
+```
+
+val max = words.reduceByKey(math.max(_,_))
+
+val min = words.reduceByKey(math.min(_,_))
+
+val min_max = min.join(max) // join two dicts
+
+words.map(x=>s"${x._1},${x._2}B").saveAsTextFile("output")  // save as file with Bytes
+
+xx.foreach{case(key,value)=>println(key+","+value.mkString("B,")+"B")} // print out with Bytes
+
+```
+http://subdom0003.example.com,236544B,21504B
+http://subdom0001.example.com,3B,238B
+http://subdom0002.example.com,451936256B,30408704B,33554432B
+```
+
+val size = words.groupByKey().map(k=>(k._1,k._2.iterator.size)) // get the size
+
+```
+size.foreach(println)
+(http://subdom0003.example.com,2)
+(http://subdom0001.example.com,2)
+(http://subdom0002.example.com,3)
+```
+
+val sum_size = words.reduceByKey(_+_).join(size)
+
+```
+sum_size.foreach(println)
+(http://subdom0003.example.com,(258048,2))
+(http://subdom0001.example.com,(241,2))
+(http://subdom0002.example.com,(515899392,3))
+```
+
+
+val mean = sum_size.map(x=>(x._1,x._2._1/x._2._2))   // mean
+```
+mean.foreach(println)
+(http://subdom0003.example.com,129024)
+(http://subdom0001.example.com,120)
+(http://subdom0002.example.com,171966464)
+```
+
+val t = words.join(mean)
+val tt = t.map(x=>(x._1,x._2._1-x._2._2))
+val ttt = tt.map(x=>(x._1,x._2^2))  // get the square
+
+// get the square
+val t= words.join(mean).map(x=>(x._1,x._2._1-x._2._2)).map(x=>(x._1,x._2*x._2)) 
+
+val variance = t.reduceByKey(_+_).join(size).map(x=>(x._1,x._2._1/x._2._2)) // variance
+
+// output
+val output = min_max.join(mean).join(variance).map(x=>(x._1,x._2._1._1._1,x._2._1._1._2,x._2._1._2,x._2._2))
+
+
+def trans(a:Double):String = {
+   val temp = a.toString.split("E")
+   var out:String = ""
+   if( temp.size == 2){
+      val num = temp(0).split("\\.")
+      if( num.size == 2){
+         if (num(1).size < temp(1).toInt){
+            out = out +num(0)+num(1)
+            val i = temp(1).toInt - num(1).size
+            val j:Int = 0
+            for ( j <- 1 to i){
+               out = out + "0"
+            }
+            out = out + "B"
+            return out
+         } else {
+            out = out +num(0)+num(1).take(temp(1).toInt)
+            out = out +"B"
+            return out
+         }
+      } else {
+          val j:Int = 0
+          for ( j <- 1 to temp(1).toInt){
+             out = out + "0"
+          }
+          out = out + "B"
+          return out
+      }
+   } else {
+      val num = temp(0).split("\\.")
+      out = out + num(0) +"B"
+      return out
+   }
+   return out
+}
+
+val aaaa = output.map(x=>(x._1,trans(x._2),trans(x._3),trans(x._4),trans(x._5))) // final output
+
+// output to file
+aaaa.sortBy{case(a,b,c,d,e)=>a}.map{case(a,b,c,d,e)=>Array(a,b,c,d,e).mkString(",")}.saveAsTextFile("output")
+
+
+
+
