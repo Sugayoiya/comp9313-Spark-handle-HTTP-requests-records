@@ -100,11 +100,16 @@ output.foreach(println)
 
 // function to transform the Double numbers to String
 def trans(a:Double):String = {
+   // split double number by "E"
    val temp = a.toString.split("E")
    var out:String = ""
+   // if the double number have a "E"
    if( temp.size == 2){
+      // split the first part by "."
       val num = temp(0).split("\\.")
+      // if the number contains a dot "."
       if( num.size == 2){
+         // if the number of the number after the dot less than the number after "E"
          if (num(1).size < temp(1).toInt){
             out = out +num(0)+num(1)
             val i = temp(1).toInt - num(1).size
@@ -146,8 +151,9 @@ finalout.foreach(println)
 */
 
 // output to file sorted by key(optional)
-finalout.sortBy{case(a,b,c,d,e)=>a}.map{case(a,b,c,d,e)=>Array(a,b,c,d,e).mkString(",")}.saveAsTextFile(outputDirPath)
-
+//finalout.sortBy{case(a,b,c,d,e)=>a}.map{case(a,b,c,d,e)=>Array(a,b,c,d,e).mkString(",")}.saveAsTextFile(outputDirPath)
+// output to file 
+finalout.map{case(a,b,c,d,e)=>Array(a,b,c,d,e).mkString(",")}.saveAsTextFile(outputDirPath)
 
 
 
