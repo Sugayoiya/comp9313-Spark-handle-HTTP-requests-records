@@ -22,10 +22,8 @@ http://subdom0003.example.com,21504B,236544B,129024B,11560550400B
 ```
 
 
-resolve the problem described in pdf
-
 sample input text file is "sample_input.txt"
 sample output text file is "sample_output.txt"
 the real scala output is in "output" directory
 
-change the first two lines "inputFilePath" and "outputDirPath" for other input file and output directory. 
+change the first two lines "inputFilePath" and "outputDirPath" for other input file and output absolute directory. 
